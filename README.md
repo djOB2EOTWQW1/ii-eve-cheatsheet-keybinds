@@ -14,5 +14,10 @@ Self-contained: bundles its own `HyprlandKeybinds` / `KeybindsEditor` / `Cheatsh
 ## Install
 Extensions settings → paste this directory's path (local) or the repo URL → Install → enable. The **Keybinds** tab appears in the cheatsheet (Super+/ or your configured shortcut).
 
+## Credits
+
+**[asteriau](https://github.com/asteriau/dotfiles)** Borrowed the searchable keybind cheatsheet (live filter + empty state) and the `CheatsheetSearch` session-scoped query singleton.
+
+
 ## License
 GPL-3.0 — derived from the GPL-3.0 licensed ii-eve / dots-hyprland code.
