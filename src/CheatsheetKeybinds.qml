@@ -11,18 +11,23 @@ import Quickshell
 
 Item {
     id: root
+    // Injected by the cheatsheet contribution point.
+    property string extensionId: ""
+    readonly property string _extId: "ii-eve-cheatsheet-keybinds"
     property real padding: 4
     property bool editMode: false
-    onEditModeChanged: if (editMode && !Config.options.cheatsheet.allowEditing) editMode = false;
+    // ii-eve exposes Config.options.cheatsheet.allowEditing (toggle in Settings); ii-vynx
+    // has no such option, so default editing to available there.
+    readonly property bool allowEditing: Config.options?.cheatsheet?.allowEditing ?? true
+    onEditModeChanged: if (editMode && !root.allowEditing) editMode = false;
+    onAllowEditingChanged: if (!root.allowEditing) root.editMode = false;
 
-    Connections {
-        target: Config.options.cheatsheet
-        function onAllowEditingChanged() {
-            if (!Config.options.cheatsheet.allowEditing) root.editMode = false;
-        }
-    }
-    implicitWidth: QsWindow?.window?.screen.width * 0.7 ?? 0
-    implicitHeight: QsWindow?.window?.screen.height * 0.7 ?? 0
+    // Stable fixed size (like the timetable/periodic cheatsheet pages). Deriving from
+    // QsWindow.window.screen inside the SwipeView's render layer oscillates (window goes
+    // null intermittently) → binding loop on the SwipeView height → unstable geometry that
+    // breaks tab switching and dialog clicks.
+    implicitWidth: 1350
+    implicitHeight: 700
 
     readonly property string query: CheatsheetSearch.query
     readonly property string normalizedQuery: query.trim().toLowerCase()
@@ -101,7 +106,9 @@ Item {
 
     readonly property var orderedCategories: {
         const all = HyprlandKeybinds.keybindCategories;
-        const raw = Config.options.cheatsheet.categoryOrder || "";
+        // Persisted in extension config so reordering survives on shells (ii-vynx) whose
+        // Config has no cheatsheet.categoryOrder.
+        const raw = ExtensionManager.getExtensionConfig(root._extId, "categoryOrder", Config.options?.cheatsheet?.categoryOrder ?? "") || "";
         const saved = raw.length > 0 ? raw.split(",") : [];
         const result = [];
         for (const name of saved) {
@@ -123,7 +130,7 @@ Item {
             const tmp = current[i];
             current[i] = current[j];
             current[j] = tmp;
-            Config.options.cheatsheet.categoryOrder = current.join(",");
+            ExtensionManager.setExtensionConfig(root._extId, "categoryOrder", current.join(","));
         });
     }
 
@@ -274,7 +281,7 @@ Item {
 
         IconToolbarButton {
             implicitWidth: height
-            visible: Config.options.cheatsheet.allowEditing
+            visible: root.allowEditing
             toggled: root.editMode
             onClicked: root.editMode = !root.editMode
             text: "edit"

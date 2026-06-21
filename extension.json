@@ -1,8 +1,8 @@
 {
   "name": "Cheatsheet Keybinds",
-  "description": "Keybinds page for the ii-eve cheatsheet.",
-  "version": "1.0.0", "author": "djOB2EOTWQW1", "icon": "keyboard",
-  "contributes": { "cheatsheetPages": [
+  "description": "Editable keybinds cheatsheet tab: searchable categories, add/edit/delete, conflict detection.",
+  "version": "1.1.0", "author": "djOB2EOTWQW1", "icon": "keyboard",
+  "contributes": { "cheatsheet": [
     { "identifier": "keybinds", "title": "Keybinds", "icon": "keyboard", "component": "src/CheatsheetKeybinds.qml" }
   ] }
 }

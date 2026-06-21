@@ -190,7 +190,7 @@ Singleton {
                 if (result.ok) {
                     root.mutationTick++;
                     root._awaitingReload = true;
-                    Hyprland.dispatch("reload");
+                    Quickshell.execDetached(["hyprctl", "reload"]);
                     reloadTimeout.restart();
                 }
                 root.applyFinished(root._pendingOp, result);
@@ -251,7 +251,7 @@ Singleton {
                     rb = { ok: false, error: "rollback: empty or malformed script output: " + (raw || "<empty>") };
                 }
                 if (rb.ok) {
-                    Hyprland.dispatch("reload");
+                    Quickshell.execDetached(["hyprctl", "reload"]);
                     root.applyFinished("rollback", { ok: false, error: "Reload failed, restored backup" });
                 } else {
                     root.applyFinished("rollback", { ok: false, error: "Reload failed AND rollback failed: " + (rb.error || "unknown") });
