@@ -20,8 +20,6 @@ Singleton {
     property string _defaultText: ""
     property string _customText: ""
 
-    property int mutationTick: 0
-
     readonly property var modOrder: ["CTRL", "SUPER", "SHIFT", "ALT"]
     readonly property var modAliases: ({
         "CTRL": "CTRL", "CONTROL": "CTRL",
@@ -188,7 +186,6 @@ Singleton {
                     result = { ok: false, error: "empty or malformed script output: " + (raw || "<empty>") };
                 }
                 if (result.ok) {
-                    root.mutationTick++;
                     root._awaitingReload = true;
                     Quickshell.execDetached(["hyprctl", "reload"]);
                     reloadTimeout.restart();

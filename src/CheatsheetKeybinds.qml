@@ -3,11 +3,9 @@ pragma ComponentBehavior: Bound
 import qs.services
 import "services"
 import qs.modules.common
-import qs.modules.common.functions
 import qs.modules.common.widgets
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 
 Item {
     id: root
@@ -233,7 +231,7 @@ Item {
                 StyledText {
                     Layout.alignment: Qt.AlignHCenter
                     color: Appearance.m3colors.m3onSurfaceVariant
-                    text: `No keybinds match "${root.query}"`
+                    text: `${Translation.tr("No keybinds match")} "${root.query}"`
                 }
             }
         }
@@ -329,9 +327,11 @@ Item {
 
     Rectangle {
         id: snackbar
+        // Above searchToolbar (z: 5) and floated clear of it, so feedback isn't hidden behind it.
+        z: 6
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 24
+        anchors.bottomMargin: 90
         radius: Appearance.rounding.small
         color: Appearance.m3colors.m3inverseSurface
         implicitWidth: snackText.implicitWidth + 32

@@ -1,8 +1,6 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
 
-import qs.modules.common
-import qs.modules.common.functions
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -10,7 +8,9 @@ import Quickshell.Hyprland
 
 /**
  * A service that provides access to Hyprland keybinds.
- * Uses the `get_keybinds.py` script to parse comments in config files in a certain format and convert to JSON.
+ * Runs `hyprctl binds -j`, stores the parsed JSON in `keybinds`, and derives `keybindCategories`
+ * by splitting each bind's `description` on the first `:` (the part before `:` is the category).
+ * Re-runs on the Hyprland `configreloaded` event.
  */
 Singleton {
     id: root
@@ -38,7 +38,7 @@ Singleton {
                     root.keybinds = JSON.parse(text)
                     var groups = []
                     for (var i = 0; i < root.keybinds.length; i++) {
-                        var bind = root.keybinds[i].description
+                        var bind = root.keybinds[i].description ?? ""
                         var group = bind.substring(0, bind.indexOf(":"))
                         if (!groups.includes(group) && group.length > 0) {
                             groups.push(group)

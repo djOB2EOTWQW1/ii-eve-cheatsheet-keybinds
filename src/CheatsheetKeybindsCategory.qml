@@ -1,13 +1,11 @@
 pragma ComponentBehavior: Bound
 
-import qs.services
 import "services"
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 
 Rectangle {
     id: root
@@ -71,8 +69,8 @@ Rectangle {
     property var keyBlacklist: ["SUPER_L", "SUPER_R"]
     property var keySubstitutions: Object.assign({
             "Super": "",
-            "Mouse_up": "Scroll ↓",
-            "Mouse_down": "Scroll ↑",
+            "Mouse_up": "Scroll ↑",
+            "Mouse_down": "Scroll ↓",
             "Mouse:272": "LMB",
             "Mouse:273": "RMB",
             "Mouse:275": "MouseBack",
@@ -80,10 +78,10 @@ Rectangle {
             "Hash": "#",
             "Return": "Enter",
         },
-        !!Config.options.cheatsheet.superKey ? { "Super": Config.options.cheatsheet.superKey } : {},
-        Config.options.cheatsheet.useMacSymbol ? macSymbolMap : {},
-        Config.options.cheatsheet.useFnSymbol ? functionSymbolMap : {},
-        Config.options.cheatsheet.useMouseSymbol ? mouseSymbolMap : {},
+        !!Config.options?.cheatsheet?.superKey ? { "Super": Config.options.cheatsheet.superKey } : {},
+        Config.options?.cheatsheet?.useMacSymbol ? macSymbolMap : {},
+        Config.options?.cheatsheet?.useFnSymbol ? functionSymbolMap : {},
+        Config.options?.cheatsheet?.useMouseSymbol ? mouseSymbolMap : {},
     )
 
     readonly property var categoryIcons: ({
@@ -173,7 +171,7 @@ Rectangle {
                 font.weight: Font.DemiBold
                 color: Appearance.colors.colOnLayer0
                 elide: Text.ElideRight
-                text: root.isCategorized ? root.categoryName : "Uncategorized"
+                text: root.isCategorized ? root.categoryName : Translation.tr("Uncategorized")
             }
 
             Row {
@@ -253,7 +251,11 @@ Rectangle {
         }
         readonly property var parts: bindLine.keyShown ? [...bindLine.modTokens, bindLine.keyToken] : bindLine.modTokens
         readonly property string comboString: root.comboFor(bindLine.keyData)
+        // Editable only when the combo is found in a config file AND it round-trips through the
+        // editor's normalizer. Combos with mods the editor doesn't model (Caps/Mod2/Mod3/Mod5)
+        // can't be normalized, so the edit dialog could never save them — dim them instead.
         readonly property bool isEditable: KeybindsEditor.findSourceFor(bindLine.comboString) !== "generated"
+            && KeybindsEditor.normalizeCombo(bindLine.comboString) !== null
 
         Item {
             id: comboSlot
@@ -288,13 +290,13 @@ Rectangle {
                             StyledText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: tokenRow.index > 0
-                                font.pixelSize: Config.options.cheatsheet.fontSize.key || Appearance.font.pixelSize.smaller
+                                font.pixelSize: Config.options?.cheatsheet?.fontSize?.key || Appearance.font.pixelSize.smaller
                                 color: ColorUtils.transparentize(Appearance.colors.colOnSecondaryContainer, 0.4)
                                 text: "+"
                             }
                             StyledText {
                                 anchors.verticalCenter: parent.verticalCenter
-                                font.pixelSize: Config.options.cheatsheet.fontSize.key || Appearance.font.pixelSize.smaller
+                                font.pixelSize: Config.options?.cheatsheet?.fontSize?.key || Appearance.font.pixelSize.smaller
                                 font.weight: tokenRow.isTrigger ? Font.DemiBold : Font.Medium
                                 color: tokenRow.isTrigger
                                     ? Appearance.colors.colOnSecondaryContainer
@@ -309,7 +311,7 @@ Rectangle {
 
         StyledText {
             anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: Config.options.cheatsheet.fontSize.comment || Appearance.font.pixelSize.smaller
+            font.pixelSize: Config.options?.cheatsheet?.fontSize?.comment || Appearance.font.pixelSize.smaller
             color: Appearance.colors.colOnLayer0
             text: {
                 if (!root.categoryName) return bindLine.keyData.description;

@@ -33,7 +33,7 @@ Rectangle {
         }
         StyledText {
             anchors.verticalCenter: parent.verticalCenter
-            text: "Add keybind"
+            text: Translation.tr("Add keybind")
             color: Appearance.m3colors.m3onSurfaceVariant
             font.pixelSize: Appearance.font.pixelSize.smaller
         }

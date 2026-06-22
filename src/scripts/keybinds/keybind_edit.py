@@ -200,7 +200,9 @@ def backup(path):
     sweep_backups()
     try:
         BACKUP_DIR.mkdir(parents=True, exist_ok=True)
-        ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+        # Microsecond precision so two backups of the same file within one second don't collide
+        # (same filename → the earlier rollback point would be overwritten).
+        ts = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
         prefix = path.parent.name
         bak = BACKUP_DIR / f"{prefix}-{path.name}.{ts}.bak"
         bak.write_bytes(path.read_bytes())
@@ -337,7 +339,6 @@ def cmd_add(spec):
     validate_command(command)
     desc = f"{spec['category']}: {spec['description']}"
 
-    pre_existed = CUSTOM_FILE.exists() and CUSTOM_FILE.stat().st_size > 0
     ensure_custom_exists()
     # Refuse if combo already present in custom (defaults can be overridden, but custom dups not).
     if find_lines(CUSTOM_FILE, combo):
@@ -356,8 +357,9 @@ def cmd_add(spec):
     )
     new_text = text + line
 
-    if pre_existed:
-        backup(CUSTOM_FILE)
+    # Always back up the pre-add content (even a freshly created header-only file) so a failed
+    # reload can be rolled back — otherwise the very first add would leave nothing to restore.
+    backup(CUSTOM_FILE)
     write_validated(CUSTOM_FILE, new_text)
 
     appended_at = len(new_text.splitlines())
@@ -391,6 +393,10 @@ def inject_description(line, full_desc):
 
     # Case 2: line ends with `)` but no options block → add a fresh block.
     if not stripped.endswith(")"):
+        return None
+    # If the line has braces we couldn't parse as a simple options block (e.g. a nested table),
+    # refuse rather than appending a second `{ ... }` and silently producing a broken bind.
+    if "{" in stripped or "}" in stripped:
         return None
     insertion = f', {{ description = "{escaped}" }}'
     return stripped[:-1] + insertion + ")" + suffix
